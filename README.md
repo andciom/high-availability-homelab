@@ -456,3 +456,13 @@ This project demonstrates practical experience with:
 - GitHub
 
 
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE)
+for details.
+
+This repository contains configuration examples for third-party
+open-source software. Those projects remain subject to their respective
+licenses.
+
+Copyright (c) 2026 Andrew Ciomperlik
