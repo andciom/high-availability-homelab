@@ -1,0 +1,15 @@
+services:
+  haproxy:
+    image: haproxy:3.4-alpine
+    container_name: haproxy
+    restart: unless-stopped
+
+    ports:
+      - "853:853/tcp"
+
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./certs:/etc/haproxy/certs:ro
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,85 @@
+services:
+
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard
+    restart: unless-stopped
+
+    depends_on:
+      unbound:
+        condition: service_healthy
+
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "3000:3000/tcp"
+      - "8086:8086/tcp"
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    volumes:
+      - /home/user/docker/infrastructure/adguard/work:/opt/adguardhome/work
+      - /home/user/docker/infrastructure/adguard/conf:/opt/adguardhome/conf
+
+    networks:
+      - proxy
+      - dns_backend
+
+
+  unbound:
+    image: klutchell/unbound:main
+    container_name: unbound
+    restart: unless-stopped
+
+    networks:
+      - dns_backend
+
+    healthcheck:
+      test:
+        - CMD
+        - drill-hc
+        - "@127.0.0.1"
+        - "dnssec.works"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+
+  caddy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: caddy-porkbun:local
+    container_name: caddy
+    restart: unless-stopped
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    env_file:
+      - .env
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+
+    volumes:
+      - /home/user/docker/infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /home/user/docker/infrastructure/caddy/data:/data
+      - /home/user/docker/infrastructure/caddy/config:/config
+
+    networks:
+      - proxy
+
+
+networks:
+
+  proxy:
+    external: true
+
+  dns_backend:
+    driver: bridge

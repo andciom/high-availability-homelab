@@ -1,0 +1,77 @@
+*.your.custom.domsin {
+    tls {
+        dns porkbun {
+            api_key {env.PORKBUN_API_KEY}
+            api_secret_key {env.PORKBUN_API_SECRET_KEY}
+        }
+
+        resolvers 1.1.1.1 8.8.8.8
+        propagation_timeout 5m
+    }
+
+    abort
+}
+
+adguard.your.custom.domsin {
+    reverse_proxy host.docker.internal:8086
+}
+
+openwebui.your.custom.domsin {
+    reverse_proxy host.docker.internal:8080
+}
+
+homepage.your.custom.domsin {
+    reverse_proxy host.docker.internal:3034
+}
+
+n8n.your.custom.domsin {
+    reverse_proxy host.docker.internal:5678
+}
+
+dozzle.your.custom.domsin {
+    reverse_proxy host.docker.internal:3005
+}
+
+ittools.your.custom.domsin {
+    reverse_proxy host.docker.internal:9090
+}
+
+omnitools.your.custom.domsin {
+    reverse_proxy host.docker.internal:8082
+}
+
+wud.your.custom.domsin {
+    reverse_proxy wud:3000
+}
+
+portainer.your.custom.domsin {
+    reverse_proxy https://portainer:9443 {
+        transport http {
+            tls_insecure_skip_verify
+        }
+    }
+}
+
+openclaw.your.custom.domain {
+    reverse_proxy host.docker.internal:18789
+}
+
+hermes.your.custom.domsin {
+    reverse_proxy host.docker.internal:8642
+}
+
+dns.your.custom.domsin {
+    reverse_proxy /dns-query* host.docker.internal:8086
+}
+
+stirling.your.custom.domain{
+    reverse_proxy stirling-pdf:8080
+}
+ 
+convertx.your.custom.domain {
+    reverse_proxy convertx:3000
+}
+
+netbox.your.custom.domain {
+    reverse_proxy orangepi:8000
+}
