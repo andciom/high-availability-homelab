@@ -1,0 +1,94 @@
+services:
+
+  unbound:
+    image: klutchell/unbound:main
+    container_name: unbound
+    restart: unless-stopped
+
+    networks:
+      - dns
+
+    healthcheck:
+      test:
+        - CMD
+        - drill-hc
+        - "@127.0.0.1"
+        - dnssec.works
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard
+    restart: unless-stopped
+
+    depends_on:
+      unbound:
+        condition: service_healthy
+
+    ports:
+      - "${ORANGE_PI_IP}:53:53/tcp"
+      - "${ORANGE_PI_IP}:53:53/udp"
+      - "${ORANGE_PI_IP}:3000:3000/tcp"
+      - "${ORANGE_PI_IP}:8086:80/tcp"
+
+    volumes:
+      - ./adguard/work:/opt/adguardhome/work
+      - ./adguard/conf:/opt/adguardhome/conf
+
+    networks:
+      - dns
+
+
+  haproxy:
+    image: haproxy:3.4-alpine
+    container_name: haproxy
+    restart: unless-stopped
+
+    depends_on:
+      - adguard
+
+    ports:
+      - "${ORANGE_PI_IP}:853:853/tcp"
+
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/usr/local/etc/haproxy/certs:ro
+
+    networks:
+      - dns
+
+
+  adguardhome-sync:
+    image: ghcr.io/bakito/adguardhome-sync:latest
+    container_name: adguardhome-sync
+
+    command:
+      - run
+      - --config
+      - /config/adguardhome-sync.yaml
+
+    environment:
+      ORIGIN_USERNAME: ${ADGUARD_SYNC_ORIGIN_USERNAME}
+      ORIGIN_PASSWORD: ${ADGUARD_SYNC_ORIGIN_PASSWORD}
+      REPLICA1_USERNAME: ${ADGUARD_SYNC_REPLICA_USERNAME}
+      REPLICA1_PASSWORD: ${ADGUARD_SYNC_REPLICA_PASSWORD}
+
+    depends_on:
+      - adguard
+
+    volumes:
+      - ./adguard-sync/adguardhome-sync.yaml:/config/adguardhome-sync.yaml:ro
+
+    networks:
+      - dns
+
+    restart: unless-stopped
+
+
+networks:
+  dns:
+    driver: bridge 

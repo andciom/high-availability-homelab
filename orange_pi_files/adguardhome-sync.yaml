@@ -1,0 +1,37 @@
+cron: "*/10 * * * *"
+runOnStart: true
+continueOnError: false
+
+origin:
+  url: http://192.168.0.102:8080
+
+replica:
+  url: http://adguard:80
+
+api:
+  port: 0
+
+features:
+  dns:
+    accessLists: true
+    serverConfig: false
+    rewrites: true
+
+  dhcp:
+    serverConfig: false
+    staticLeases: false
+
+  generalSettings: true
+  protectionStatus: true
+  queryLogConfig: true
+  statsConfig: true
+  clientSettings: true
+  services: true
+
+  filters:
+    blacklist: true
+    whitelist: true
+    userRules: true
+
+  theme: true
+  tlsConfig: false
